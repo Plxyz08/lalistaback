@@ -39,7 +39,6 @@ router.post("/registro", [
     check('password', 'La contraseña debe tener al menos 1 mayuscula, 1 minuscula, 2 números y un caracter especial.')
     .custom(helpersUsuario.validarClave),
     check('rol', 'El rol es obligatorio').not().isEmpty(),
-    check('metodoDonacion', 'El metodo de donacion es obligatorio').not().isEmpty(),
     validarCampos,
 ], httpUser.postUserRegistro);
 
@@ -89,7 +88,6 @@ router.put("/editar/:id", [
     check('nombre', 'El nombre es obligatorio').not().isEmpty(),
     check('nombre').custom(helpersUsuario.existeNombre),
     check('correo', 'El correo es obligatorio').isEmail(),
-    check('metodoDonacion', 'El metodo de donacion es obligatorio').not().isEmpty(),
     validarCampos,
 ], httpUser.putUserUpdate);
 

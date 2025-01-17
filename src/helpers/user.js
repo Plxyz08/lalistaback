@@ -83,7 +83,7 @@ const helpersUsuario = {
     },
 
     validarClave: async (clave, req) => {
-        const vali = /^(?=.[A-Z])(?=.[a-z])(?=.\d.\d)(?=.*[@#$%^&+=!]).{8,}$/;
+        const vali = /^(?=.[A-Z])(?=.[a-z])(?=.*\d).{8,}$/;        
         if (!vali.test(clave)) {
             throw new Error("La contraseña no cumple con los requisitos");
         }
