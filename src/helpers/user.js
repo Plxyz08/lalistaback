@@ -10,14 +10,14 @@ const helpersUsuario = {
             throw new Error('El usuario no esta registrado');
         }
         if (!existe.estado) {
-            throw new Error(`El usuario ${ existe.nombre } esta inactivo`);
+            throw new Error(`El usuario ${existe.nombre} esta inactivo`);
         }
 
         req.req.UserUpdate = existe;
     },
 
     existeNombre: async (nombre, req) => {
-        const existe = await User.findOne({nombre});
+        const existe = await User.findOne({ nombre });
 
         if (existe) {
             if (req.req.method === "PUT" && req.req.body._id != existe._id) {
@@ -28,7 +28,7 @@ const helpersUsuario = {
         }
 
         if (!existe && req.req.method === "GET") {
-            throw new Error('El nombre no se encuentra registrado');  
+            throw new Error('El nombre no se encuentra registrado');
         }
 
         req.req.UserUpdate = existe;
@@ -46,7 +46,7 @@ const helpersUsuario = {
 
     desactivarLogeado: async (id, req) => {
         const idLogeado = req.req.UserUpdate._id;
-        
+
         if (idLogeado == id) {
             throw new Error('No puedes desactivarte a ti mismo');
         }
@@ -83,12 +83,19 @@ const helpersUsuario = {
     },
 
     validarClave: async (clave, req) => {
-        const vali = /^(?=.[A-Z])(?=.[a-z])(?=.*\d).{8,}$/;        
+        // Expresión regular que valida:
+        // (?=.*[A-Z]) - Al menos una mayúscula
+        // (?=.*[a-z]) - Al menos una minúscula
+        // (?=.*\d) - Al menos un número
+        // (?=.[!@#$%^&(),.?":{}|<>]) - Al menos un caracter especial
+        // .{8,} - Mínimo 8 caracteres
+        const vali = /^(?=.[A-Z])(?=.[a-z])(?=.\d)(?=.[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+
         if (!vali.test(clave)) {
-            throw new Error("La contraseña no cumple con los requisitos");
+            throw new Error("La contraseña debe tener al menos 1 mayúscula, 1 minúscula, 1 número, 1 caracter especial y mínimo 8 caracteres");
         }
         return true;
-    },
+    }
 
 };
 export default helpersUsuario;

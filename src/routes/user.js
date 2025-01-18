@@ -38,7 +38,6 @@ router.post("/registro", [
     check('password', 'La contraseña es obligatoria').not().isEmpty(),
     check('password', 'La contraseña debe tener al menos 1 mayuscula, 1 minuscula, 2 números y un caracter especial.')
     .custom(helpersUsuario.validarClave),
-    check('rol', 'El rol es obligatorio').not().isEmpty(),
     validarCampos,
 ], httpUser.postUserRegistro);
 
