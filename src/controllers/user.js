@@ -86,8 +86,8 @@ const hhtpUser = {
     //Registro de usuario
     postUserRegistro: async (req, res) => {
         try {
-            const { nombre, correo, password, image } = req.body;
-            const user = new User({ nombre, correo, password, image });
+            const { nombre, correo, password, rol, image } = req.body;
+            const user = new User({ nombre, correo, password, rol, image });
             if (user.password) {
                 const salt = bcrypt.genSaltSync();
                 user.password = bcrypt.hashSync(password, salt);

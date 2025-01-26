@@ -155,8 +155,7 @@ const httpPublicacion = {
     // Agregar una nueva publicación
     postAddPublicacion: async (req, res) => {
         try {
-            const { titulo, contenido, idUser, tipo, categoria, ciudad } = req.body;
-
+            const { titulo, contenido, idUser, imagen, tipo, categoria, ciudad } = req.body;
             const nuevaPublicacion = new Publicacion({
                 titulo,
                 contenido,
