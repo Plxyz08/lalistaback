@@ -27,7 +27,7 @@ class Server {
         this.app.use(cors({
             origin: ['http://localhost:3000', 'https://lalista.onrender.com'],
             methods: ['GET', 'POST', 'PUT', 'DELETE'],
-            allowedHeaders: ['Content-Type', 'Authorization']
+            allowedHeaders: ['Content-Type', 'Authorization', 'x-token']
         }));
         this.app.use(express.static('public'));
     }
