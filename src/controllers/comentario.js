@@ -130,33 +130,54 @@ const httpComentario = {
     // Agregar un nuevo comentario
     postAddComentario: async (req, res) => {
         try {
-          const { idPublicacion, idUser, contenido } = req.body
-          const nuevoComentario = new Comentario({
-            idPublicacion,
-            idUser,
-            contenido,
-          })
-    
-          // Obtener el creador de la publicación
-          const publicacion = await Publicacion.findById(idPublicacion)
-          if (!publicacion) {
-            return res.status(404).json({ error: 'Publicación no encontrada' })
-          }
-    
-          const nuevaNotificacion = new Notificacion({
-            idUser: publicacion.idUser, // Enviar la notificación al creador de la publicación
-            idComentario: nuevoComentario._id,
-            tipo: 'comentario',
-            mensaje: 'Nuevo comentario en una publicación',
-          })
-    
-          const notificacionGuardada = await nuevaNotificacion.save()
-          const comentarioGuardado = await nuevoComentario.save()
-          res.status(201).json({ comentarioGuardado, notificacionGuardada })
+            const { idPublicacion, idUser, contenido } = req.body;
+            const nuevoComentario = new Comentario({
+                idPublicacion,
+                idUser,
+                contenido
+            });
+            const nuevaNotificacion = new Notificacion({
+                idUser,
+                idComentario: nuevoComentario._id,
+                tipo: 'comentario',
+                mensaje: 'Nuevo comentario en una publicacion'
+            });
+            const notificacionGuardada = await nuevaNotificacion.save();
+            const comentarioGuardado = await nuevoComentario.save();
+            res.status(201).json({comentarioGuardado, notificacionGuardada});
         } catch (error) {
-          res.status(500).json({ error: helpersGeneral.errores.servidor, error })
+            res.status(500).json({ error: helpersGeneral.errores.servidor, error });
         }
-      },
+    },
+
+    // Editar un comentario
+    putUpdateComentario: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { contenido, idUser } = req.body;
+            const user = await User.findById(idUser);
+            if (!user) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
+            }
+            const userId = user._id.toString();
+            const userRole = user.rol;
+            const comentario = await Comentario.findById(id);
+            if (!comentario) {
+                return res.status(404).json({ error: helpersGeneral.errores.noEncontrado });
+            }
+            if (comentario.idUser.toString() !== userId && userRole !== 'admin') {
+                return res.status(403).json({ error: 'No tienes permiso para editar este comentario' });
+            }
+            const comentarioActualizado = await Comentario.findByIdAndUpdate(
+                id,
+                { contenido },
+                { new: true }
+            );
+            res.json(comentarioActualizado);
+        } catch (error) {
+            res.status(500).json({ error: helpersGeneral.errores.servidor, error });
+        }
+    },
 
     //Activar Comentario
     putActivarComentario: async (req, res) => {
@@ -196,23 +217,6 @@ const httpComentario = {
             const { id } = req.params;
             await Comentario.findByIdAndDelete(id);
             res.json({ message: 'Comentario eliminado exitosamente' });
-        } catch (error) {
-            res.status(500).json({ error: helpersGeneral.errores.servidor, error });
-        }
-    },
-
-    // Editar un Comentario
-    putUpdateComentario: async (req, res) => {
-        try {
-            const { id } = req.params;
-            const { idUser, contenido } = req.body;
-            const comentario = await Comentario.findByIdAndUpdate(id, { idUser, contenido }, { new: true });
-            const comentarioConFechaFormateada = {
-                ...comentario.toObject(),
-                fechaFormateada: formatearFecha(comentario.createAT)
-            };
-    
-            res.json(comentarioConFechaFormateada);
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor, error });
         }
