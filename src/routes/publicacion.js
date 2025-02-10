@@ -12,7 +12,6 @@ router.get("/all", [
 ], hhtpPublicacion.getPublicaciones);
 
 router.get("/activas", [
-    validarJWT
 ], hhtpPublicacion.getPublicacionesActivas);
 
 router.get("/pendientes", [
