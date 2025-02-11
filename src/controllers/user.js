@@ -86,8 +86,8 @@ const hhtpUser = {
     //Registro de usuario
     postUserRegistro: async (req, res) => {
         try {
-            const { nombre, correo, password } = req.body;
-            const user = new User({ nombre, correo, password });
+            const { nombre, correo, password, rol, image } = req.body;
+            const user = new User({ nombre, correo, password, rol, image });
             if (user.password) {
                 const salt = bcrypt.genSaltSync();
                 user.password = bcrypt.hashSync(password, salt);
@@ -318,8 +318,8 @@ const hhtpUser = {
     putUserUpdate: async (req, res) => {
         try {
             const { id } = req.params;
-            const { nombre, correo } = req.body;
-            const user = await User.findByIdAndUpdate(id, { nombre, correo }, { new: true });
+            const { nombre, correo, image } = req.body;
+            const user = await User.findByIdAndUpdate(id, { nombre, correo, image }, { new: true });
             res.json(user);
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor });

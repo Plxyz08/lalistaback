@@ -8,11 +8,10 @@ import helpersUser from '../helpers/user.js';
 const router = Router();
 
 router.get("/all", [
-    validarJWT
+    //validarJWT
 ], hhtpPublicacion.getPublicaciones);
 
 router.get("/activas", [
-    validarJWT
 ], hhtpPublicacion.getPublicacionesActivas);
 
 router.get("/pendientes", [
@@ -41,7 +40,7 @@ router.get("/date/:startDate/:endDate", [
 ], hhtpPublicacion.getPublicacionesByDateRange);
 
 router.get("/tipo/:tipo", [
-    validarJWT,
+    //validarJWT,
     check('tipo', 'Tipo requerido').not().isEmpty(),
     validarCampos
 ], hhtpPublicacion.getPublicacionesByTipo);

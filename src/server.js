@@ -24,7 +24,11 @@ class Server {
     middelwares() {
         this.app.use(express.json());
         this.app.use(bodyParser.json());
-        this.app.use(cors());
+        this.app.use(cors({
+            origin: ['http://localhost:3000', 'https://lalista.onrender.com'],
+            methods: ['GET', 'POST', 'PUT', 'DELETE'],
+            allowedHeaders: ['Content-Type', 'Authorization', 'x-token']
+        }));
         this.app.use(express.static('public'));
     }
 

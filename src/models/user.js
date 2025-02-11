@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema({
     correo: { type: String, required: true },
     password: { type: String, required: true },
     rol: { type: String, default: 'user'},
+    image: { type: String, },
     createAT: { type: Date, default: Date.now },
     estado: { type: Boolean, default: 1 }
 });
