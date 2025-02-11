@@ -23,7 +23,7 @@ const obtenerDetallesPublicacion = async (publicacion) => {
             ...comentario.toObject(),
             reacciones: reaccionesComentario,
             contadorReacciones: reaccionesComentario.length,
-            fechaFormateada: formatearFecha(comentario.createdAt)
+            fechaFormateada: formatearFecha(comentario.createAT)
         };
     }));
 
@@ -40,9 +40,9 @@ const httpPublicacion = {
     // Obtener todas las publicaciones
     getPublicaciones: async (req, res) => {
         try {
-            const publicaciones = await Publicacion.find().populate('idUser', 'nombre');
+            const publicaciones = await Publicacion.find().populate('idUser', '_id nombre imagen');
             if (!publicaciones || publicaciones.length === 0) {
-                return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
+                return res.json({ error: helpersGeneral.errores.noEncontrado });
             }
             const publicacionesConDetalles = await Promise.all(publicaciones.map(obtenerDetallesPublicacion));
             res.json(publicacionesConDetalles);
@@ -54,9 +54,9 @@ const httpPublicacion = {
     // Obtener todas las publicaciones activas
     getPublicacionesActivas: async (req, res) => {
         try {
-            const publicaciones = await Publicacion.find({ estado: 'Activa' }).populate('idUser', 'nombre');
+            const publicaciones = await Publicacion.find({ estado: 'Activa' }).populate('idUser', '_id nombre imagen');
             if (!publicaciones || publicaciones.length === 0) {
-                return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
+                return res.json({ error: helpersGeneral.errores.noEncontrado });
             }
             const publicacionesConDetalles = await Promise.all(publicaciones.map(obtenerDetallesPublicacion));
             res.json(publicacionesConDetalles);
@@ -68,9 +68,9 @@ const httpPublicacion = {
     // Obtener todas las publicaciones Pendientes
     getPublicacionesPendientes: async (req, res) => {
         try {
-            const publicaciones = await Publicacion.find({ estado: 'Pendiente' }).populate('idUser', 'nombre');
+            const publicaciones = await Publicacion.find({ estado: 'Pendiente' }).populate('idUser', '_id nombre imagen');
             if (!publicaciones || publicaciones.length === 0) {
-                return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
+                return res.json({ error: helpersGeneral.errores.noEncontrado });
             }
             const publicacionesConDetalles = await Promise.all(publicaciones.map(obtenerDetallesPublicacion));
             res.json(publicacionesConDetalles);
@@ -83,9 +83,9 @@ const httpPublicacion = {
     getPublicacionById: async (req, res) => {
         try {
             const { id } = req.params;
-            const publicacionID = await Publicacion.findById(id);
+            const publicacionID = await Publicacion.findById(id).populate('idUser', '_id nombre imagen');
             if (!publicacionID) {
-                return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
+                return res.json({ error: helpersGeneral.errores.noEncontrado });
             }
             const publicacionConDetalles = await obtenerDetallesPublicacion(publicacionID);
             res.json(publicacionConDetalles);
@@ -98,9 +98,9 @@ const httpPublicacion = {
     getPublicacionesByIdUser: async (req, res) => {
         try {
             const { idUser } = req.params;
-            const publicaciones = await Publicacion.find({ idUser: idUser });
+            const publicaciones = await Publicacion.find({ idUser: idUser, estado: 'Activa' }).populate('idUser', '_id nombre imagen');
             if (!publicaciones || publicaciones.length === 0) {
-                return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
+                return res.json({ error: helpersGeneral.errores.noEncontrado });
             }
             const publicacionesConDetalles = await Promise.all(publicaciones.map(obtenerDetallesPublicacion));
             res.json(publicacionesConDetalles);
@@ -121,10 +121,11 @@ const httpPublicacion = {
                 createAT: {
                     $gte: start,
                     $lte: end
-                }
-            });
+                },
+                estado: 'Activa'
+            }).populate('idUser', '_id nombre imagen');
             if (publicaciones.length === 0) {
-                return res.status(404).json({
+                return res.json({
                     error: 'No se encontraron publicaciones en el rango de fechas.'
                 });
             }
@@ -139,9 +140,9 @@ const httpPublicacion = {
     getPublicacionesByTipo: async (req, res) => {
         try {
             const { tipo } = req.params;
-            const publicaciones = await Publicacion.find({ tipo: tipo });
+            const publicaciones = await Publicacion.find({ tipo: tipo, estado: 'Activa' }).populate('idUser', '_id nombre imagen');
             if (publicaciones.length === 0) {
-                return res.status(404).json({
+                return res.json({
                     error: 'No se encontraron publicaciones con el tipo especificado.'
                 });
             }
@@ -155,8 +156,7 @@ const httpPublicacion = {
     // Agregar una nueva publicación
     postAddPublicacion: async (req, res) => {
         try {
-            const { titulo, contenido, idUser, tipo, categoria, ciudad } = req.body;
-
+            const { titulo, contenido, idUser, imagen, tipo, categoria, ciudad } = req.body;
             const nuevaPublicacion = new Publicacion({
                 titulo,
                 contenido,

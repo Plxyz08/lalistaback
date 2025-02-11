@@ -88,7 +88,7 @@ const httpReaccion = {
                 };
             });
     
-            res.json(reaccionConFechaFormateada);
+            res.json({reaccionConFechaFormateada});
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor});
         }
