@@ -19,7 +19,6 @@ router.get("/pendientes", [
 ], hhtpPublicacion.getPublicacionesPendientes);
 
 router.get("/:id", [
-    validarJWT,
     check('id', 'Identificador requerido').not().isEmpty(),
     check('id', 'Identificador requerido').isMongoId(),
     validarCampos
