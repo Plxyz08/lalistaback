@@ -2,6 +2,7 @@ import Comentario from '../models/comentario.js';
 import User from '../models/user.js';
 import Notificacion from '../models/notificacion.js';
 import helpersGeneral from '../helpers/generales.js';
+import Publicacion from '../models/publicacion.js';
 
 const formatearFecha = (fecha) => {
     const date = new Date(fecha);
@@ -19,14 +20,14 @@ const httpComentario = {
             if (!comentarios || comentarios.length === 0) {
                 return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
             }
-    
+
             const comentariosConFechaFormateada = comentarios.map((comentario) => {
                 return {
                     ...comentario.toObject(),
                     fechaFormateada: formatearFecha(comentario.createAT)
                 };
             });
-    
+
             res.json(comentariosConFechaFormateada);
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor, error });
@@ -41,12 +42,12 @@ const httpComentario = {
             if (!comentario) {
                 return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
             }
-    
+
             const comentarioConFechaFormateada = {
                 ...comentario.toObject(),
                 fechaFormateada: formatearFecha(comentario.createAT)
             };
-    
+
             res.json(comentarioConFechaFormateada);
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor });
@@ -56,7 +57,7 @@ const httpComentario = {
     // Obtener Comentarios por el id de la Publicacion
     getComentarioByIdPublicacion: async (req, res) => {
         try {
-            const { idPublicacion } = req.params;   
+            const { idPublicacion } = req.params;
             const comentario = await Comentario.find({ idPublicacion: idPublicacion }).populate('idUser', 'nombre');;
             if (!comentario || comentario.length === 0) {
                 return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
@@ -67,10 +68,10 @@ const httpComentario = {
                     fechaFormateada: formatearFecha(comentario.createAT)
                 };
             });
-    
+
             res.json(comentariosConFechaFormateada);
         } catch (error) {
-            res.status(500).json({ error: helpersGeneral.errores.servidor});
+            res.status(500).json({ error: helpersGeneral.errores.servidor });
         }
     },
 
@@ -88,7 +89,7 @@ const httpComentario = {
                     fechaFormateada: formatearFecha(comentario.createAT)
                 };
             });
-    
+
             res.json(comentariosConFechaFormateada);
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor, error });
@@ -104,13 +105,13 @@ const httpComentario = {
             start.setUTCHours(0, 0, 0, 0);
             end.setUTCHours(23, 59, 59, 999);
             const comentarios = await Comentario.find({
-                createAT: { 
-                    $gte: start, 
-                    $lte: end 
+                createAT: {
+                    $gte: start,
+                    $lte: end
                 }
             }).populate('idUser', 'nombre');
             if (comentarios.length === 0) {
-                return res.status(404).json({ 
+                return res.status(404).json({
                     error: 'No se encontraron comentarios en el rango de fechas.'
                 });
             }
@@ -120,7 +121,7 @@ const httpComentario = {
                     fechaFormateada: formatearFecha(comentario.createAT)
                 };
             });
-    
+
             res.json(comentariosConFechaFormateada);
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor, error });
@@ -136,15 +137,17 @@ const httpComentario = {
                 idUser,
                 contenido
             });
+            const userPropietario = await Publicacion.findById(idPublicacion);
             const nuevaNotificacion = new Notificacion({
-                idUser,
+                idUser: userPropietario.idUser,
                 idComentario: nuevoComentario._id,
+                idPublicacion,
                 tipo: 'comentario',
                 mensaje: 'Nuevo comentario en una publicacion'
             });
             const notificacionGuardada = await nuevaNotificacion.save();
             const comentarioGuardado = await nuevoComentario.save();
-            res.status(201).json({comentarioGuardado, notificacionGuardada});
+            res.status(201).json({ comentarioGuardado, notificacionGuardada });
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor, error });
         }
@@ -188,7 +191,7 @@ const httpComentario = {
                 ...comentario.toObject(),
                 fechaFormateada: formatearFecha(comentario.createAT)
             };
-    
+
             res.json(comentarioConFechaFormateada);
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor, error });
@@ -204,7 +207,6 @@ const httpComentario = {
                 ...comentario.toObject(),
                 fechaFormateada: formatearFecha(comentario.createAT)
             };
-    
             res.json(comentarioConFechaFormateada);
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor, error });
@@ -222,5 +224,6 @@ const httpComentario = {
         }
     }
 };
+
 
 export default httpComentario;

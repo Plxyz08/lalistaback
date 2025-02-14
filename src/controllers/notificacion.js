@@ -15,7 +15,7 @@ const httpNotificacion = {
         try {
             const notificaciones = await Notificacion.find();
             if (!notificaciones) {
-                return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
+                return res.json({ error: helpersGeneral.errores.noEncontrado });
             };
             const notificacionesConFechaFormateada = notificaciones.map((notificacion) => {
                 return {
@@ -36,7 +36,7 @@ const httpNotificacion = {
             const { id } = req.params;
             const notificacion = await Notificacion.findById(id);
             if (!notificacion) {
-                return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
+                return res.json({ error: helpersGeneral.errores.noEncontrado });
             };
             const notificacionConFechaFormateada = {
                 ...notificacion.toObject(),
@@ -55,7 +55,7 @@ const httpNotificacion = {
             const { idPublicacion } = req.params;
             const notificacion = await Notificacion.find({ idPublicacion: idPublicacion });
             if (!notificacion || notificacion.length === 0) {
-                return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
+                return res.json({ error: helpersGeneral.errores.noEncontrado });
             };
             const notificacionesConFechaFormateada = notificacion.map((notificacion) => {
                 return {
@@ -76,7 +76,7 @@ const httpNotificacion = {
             const { idUser } = req.params;
             const notificaciones = await Notificacion.find({ idUser: idUser });
             if (!notificaciones || notificaciones.length === 0) {
-                return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
+                return res.json({ error: helpersGeneral.errores.noEncontrado });
             }
             const notificacionesConFechaFormateada = notificaciones.map((notificacion) => {
                 return {
@@ -123,7 +123,7 @@ const httpNotificacion = {
         }
     },
 
-    // Obtener Notificaciones por tipo 
+    // Obtener Notificaciones por tipo
     getNotificacionesByTipo: async (req, res) => {
         try {
             const { tipo } = req.params;
@@ -206,6 +206,16 @@ const httpNotificacion = {
             const { id } = req.params;
             await Notificacion.findByIdAndDelete(id);
             res.json({ message: 'Notificacion eliminada exitosamente' });
+        } catch (error) {
+            res.status(500).json({ error: helpersGeneral.errores.servidor, error });
+        }
+    },
+
+    deleteByIdUser: async (req, res) => {
+        try {
+            const { idUser } = req.params;
+            await Notificacion.deleteMany({ idUser: idUser });
+            res.json({ message: 'Notificaciones eliminadas exitosamente' });
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor, error });
         }

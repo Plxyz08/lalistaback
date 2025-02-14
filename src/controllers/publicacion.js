@@ -94,6 +94,22 @@ const httpPublicacion = {
         }
     },
 
+    getPublicacionesByTitulo: async (req, res) => {
+        try {
+            const { titulo } = req.params;
+            const publicaciones = await Publicacion.find({ titulo: { $regex: titulo, $options: 'i' }, estado: 'Activa' }).populate('idUser', '_id nombre image');
+            if (publicaciones.length === 0) {
+                return res.json({
+                    error: 'No se encontraron publicaciones con el titulo especificado.'
+                });
+            }
+            const publicacionesConDetalles = await Promise.all(publicaciones.map(obtenerDetallesPublicacion));
+            res.json(publicacionesConDetalles);
+        } catch (error) {
+            res.status(500).json({ error: 'Error interno del servidor.' });
+        }
+    },
+
     // Obtener publicaciones por el id del usuario
     getPublicacionesByIdUser: async (req, res) => {
         try {
@@ -123,7 +139,7 @@ const httpPublicacion = {
                     $lte: end
                 },
                 estado: 'Activa'
-            }).populate('idUser', '_id nombre image');
+            }).populate('idUser', '_id nombre imagen');
             if (publicaciones.length === 0) {
                 return res.json({
                     error: 'No se encontraron publicaciones en el rango de fechas.'
@@ -132,7 +148,6 @@ const httpPublicacion = {
             const publicacionesConDetalles = await Promise.all(publicaciones.map(obtenerDetallesPublicacion));
             res.json(publicacionesConDetalles);
         } catch (error) {
-            console.error('Error completo:', error);
             res.status(500).json({ error: 'Error interno del servidor.' });
         }
     },
@@ -223,9 +238,10 @@ const httpPublicacion = {
             const notificacion = new Notificacion({
                 idUser: publicacion.idUser,
                 idPublicacion: publicacion._id,
-                tipo: 'Publicacion',
+                tipo: 'Publicacion_aprobada',
                 mensaje: `Se ha aprobado tu publicacion ${publicacion.titulo}.`
             });
+            await notificacion.save();
             res.json({publicacion, notificacion});
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor });
@@ -240,9 +256,10 @@ const httpPublicacion = {
             const notificacion = new Notificacion({
                 idUser: publicacion.idUser,
                 idPublicacion: publicacion._id,
-                tipo: 'Publicacion',
+                tipo: 'Publicacion_reject',
                 mensaje: `Se ha rechazado tu publicacion ${publicacion.titulo}.`
             });
+            await notificacion.save();
             res.json({publicacion, notificacion});
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor });

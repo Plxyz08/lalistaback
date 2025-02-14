@@ -89,4 +89,11 @@ router.delete("/eliminar/:id", [
     validarCampos,
 ], httpNotificacion.deleteNotificacion);
 
+router.delete("/eliminar/user/:idUser", [
+    validarJWT,
+    check('idUser', 'Identificador requerido').not().isEmpty(),
+    check('idUser', 'Identificador requerido').isMongoId(),
+    validarCampos,
+], httpNotificacion.deleteByIdUser);
+
 export default router;

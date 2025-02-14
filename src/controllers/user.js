@@ -38,7 +38,6 @@ const hhtpUser = {
     getUserById: async (req, res) => {
         try {
             const { id } = req.params;
-            console.log(id);
             const user = await User.findById(id);
             if (!user) {
                 return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
@@ -197,20 +196,17 @@ const hhtpUser = {
 
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
-                    console.error(error);
                     return res.status(500).json({
                         success: false,
                         error: 'Error al enviar el correo',
                     });
                 }
-                console.log('Correo enviado: ' + info.response);
                 res.json({
                     success: true,
                     message: 'Correo enviado exitosamente'
                 });
             });
         } catch (error) {
-            console.error(error);
             res.status(500).json({
                 success: false,
                 error: 'Error interno del servidor',
@@ -223,9 +219,8 @@ const hhtpUser = {
         try {
             const { codigo } = req.params;
             if (!codigoEnviado) {
-                res.status(400).json({ error: 'No se ha solicitado un código de recuperación' });
+                return res.status(400).json({ error: 'No se ha solicitado un código de recuperación' });
             }
-
             const { codigo: codigoGuardado, fechaCreacion } = codigoEnviado;
             const tiempoExpiracion = 30;
 
@@ -234,14 +229,14 @@ const hhtpUser = {
             const tiempoMinutos = Math.round(tiempoTranscurrido / (1000 * 60));
 
             if (tiempoMinutos > tiempoExpiracion) {
-                res.status(400).json({ error: 'El código ha expirado' });
+                return res.status(400).json({ error: 'El código ha expirado' });
             }
 
             if (codigo === codigoGuardado) {
-                res.json({ message: 'Código correcto' });
+                return res.json({ message: 'Código correcto' });
             }
 
-            res.status(400).json({ error: 'Código incorrecto' });
+            return res.status(400).json({ error: 'Código incorrecto' });
         } catch (error) {
             return res.status(500).json({ error: helpersGeneral.errores.servidor });
         }
@@ -263,19 +258,17 @@ const hhtpUser = {
                 res.status(400).json({ error: 'El código ha expirado' });
             }
 
-            if (codigo === codigoGuardado) {
+            if (codigo === Number(codigoGuardado)) {
                 codigoEnviado = {};
                 const usuario = req.UserUpdate;
-
                 const salt = bcrypt.genSaltSync();
                 const newPasswordHash = bcrypt.hashSync(password, salt);
 
                 await User.findByIdAndUpdate(usuario.id, { password: newPasswordHash }, { new: true });
-
                 return res.status(200).json({ message: 'Contraseña actualizada' });
             }
 
-            res.status(400).json({ error: 'Código incorrecto' });
+            return res.status(400).json({ error: 'Código incorrecto' });
         } catch (error) {
             return res.status(500).json({ error: helpersGeneral.errores.servidor });
         }
@@ -305,9 +298,7 @@ const hhtpUser = {
 
             const salt = bcrypt.genSaltSync();
             const newPasswordHash = bcrypt.hashSync(newPassword, salt);
-
-            await User.findByIdAndUpdate(id, { password: newPasswordHash }, new { new: true });
-
+            await User.findByIdAndUpdate(id, { password: newPasswordHash }, { new: true });
             return res.status(200).json({ message: "Contraseña actualizada" });
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor });

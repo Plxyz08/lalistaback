@@ -1,4 +1,5 @@
 import Donacion from '../models/donacion.js';
+import Notificacion from '../models/notificacion.js';
 import User from '../models/user.js';
 import nodemailer from 'nodemailer';
 import helpersGeneral from '../helpers/generales.js';
@@ -76,30 +77,40 @@ const httpDonacion = {
     postAddDonacion: async (req, res) => {
         try {
             const { idUser, monto, mensaje, comprobante } = req.body;
-            
-            const user = await User.find({ _id: idUser });
-    
+            const user = await User.findById(idUser);
+            if (!user) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
+            }
+
             const nuevaDonacion = new Donacion({
                 idUser,
                 monto,
                 mensaje,
                 comprobante,
             });
-            
-            const transporter = nodemailer.createTransport({
-                service: 'gmail',
-                auth: {
-                    user: process.env.userEmail,
-                    pass: process.env.password,
-                },
-            });
 
             const formattedMonto = formatCurrency(monto);
-    
+            const userAdmin = await User.find({ rol: 'admin' });
+            const notificaciones = [];
+            for (const admin of userAdmin) {
+                const nuevaNotificacion = new Notificacion({
+                    idUser: admin._id,
+                    idPublicacion: nuevaDonacion._id,
+                    tipo: 'donacion',
+                    mensaje: `El usuario ${user.nombre} ha donado`,
+                });
+                await nuevaNotificacion.save();
+                notificaciones.push(nuevaNotificacion);
+            }
+
+
             const htmlTemplate = `
-                <!DOCTYPE html>
-                <html>
+            <!DOCTYPE html>
+                <html lang="es">
                 <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Nueva Donación Recibida</title>
                     <style>
                         .email-container {
                             max-width: 600px;
@@ -108,6 +119,8 @@ const httpDonacion = {
                             background-color: #f9f9f9;
                             padding: 20px;
                         }
+
+
                         .header {
                             background-color: #4CAF50;
                             color: white;
@@ -115,23 +128,31 @@ const httpDonacion = {
                             text-align: center;
                             border-radius: 5px 5px 0 0;
                         }
+
+
                         .content {
                             background-color: white;
                             padding: 20px;
                             border-radius: 0 0 5px 5px;
-                            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
                         }
+
+
                         .donation-details {
                             margin: 20px 0;
                             padding: 15px;
                             background-color: #f5f5f5;
                             border-left: 4px solid #4CAF50;
                         }
+
+
                         .amount {
                             font-size: 24px;
                             color: #4CAF50;
                             font-weight: bold;
                         }
+
+
                         .message {
                             margin-top: 15px;
                             padding: 10px;
@@ -139,6 +160,8 @@ const httpDonacion = {
                             border: 1px solid #eee;
                             border-radius: 4px;
                         }
+
+
                         .footer {
                             margin-top: 20px;
                             text-align: center;
@@ -154,8 +177,8 @@ const httpDonacion = {
                         <div class="content">
                             <h2>Detalles de la Donación</h2>
                             <div class="donation-details">
-                                <p><strong>Usuario:</strong> ${user[0].nombre}</p>
-                                <p><strong>Correo:</strong> ${user[0].correo}</p>
+                                <p><strong>Usuario:</strong> ${user.nombre}</p>
+                                <p><strong>Correo:</strong> ${user.correo}</p>
                                 <p><strong>Monto:</strong> <span class="amount">${formattedMonto}</span></p>
                                 <div class="message">
                                     <p><strong>Mensaje:</strong></p>
@@ -171,69 +194,48 @@ const httpDonacion = {
                 </body>
                 </html>
             `;
-    
+
+
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: process.env.userEmail,
+                    pass: process.env.password,
+                },
+            });
+
+
             const mailOptions = {
-                from: '"La ListaWBC" <' + process.env.userEmail + '>',  
+                from: '"La ListaWBC" <' + process.env.userEmail + '>',
                 to: process.env.userEmail,
                 subject: 'Nueva Donación',
                 html: htmlTemplate
             };
-    
-            transporter.sendMail(mailOptions, (error, info) => {
+
+
+            transporter.sendMail(mailOptions, async (error, info) => {
                 if (error) {
-                    console.log(error);
-                    res.status(500).json({
+                    return res.status(500).json({
                         success: false,
                         error: 'Error al enviar el correo',
                     });
                 } else {
-                    console.log('Correo enviado: ' + info.response);
-                    res.json({ 
+                    const donacionGuardada = await nuevaDonacion.save();
+                    return res.status(201).json({
                         success: true,
-                        message: 'Correo enviado exitosamente' 
+                        message: 'Correo enviado exitosamente',
+                        donacion: donacionGuardada
                     });
                 }
             });
-    
-            const donacionGuardada = await nuevaDonacion.save();
-            res.status(201).json(donacionGuardada);
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor, error });
         }
     },
 
-    // // Editar un Donacion
-    // putUpdateDonacion: async (req, res) => {
-    //     try {
-    //         const { id } = req.params;
-    //         const { monto, mensaje, comprobante } = req.body;
-    //         const userId = req.user._id;
-    //         const userRole = req.user.rol;
-
-    //         const donacion = await Donacion.findById(id);
-
-    //         if (!donacion) {
-    //             return res.status(404).json({ error: helpersGeneral.errores.noEncontrado });
-    //         }
-
-    //         if (donacion.idUser.toString() !== userId && userRole !== 'admin') {
-    //             return res.status(403).json({ error: 'No tienes permiso para editar esta donación' });
-    //         }
-
-    //         const donacionActualizada = await Donacion.findByIdAndUpdate(
-    //             id,
-    //             { monto, mensaje, comprobante },
-    //             { new: true }
-    //         );
-
-    //         res.json(donacionActualizada);
-    //     } catch (error) {
-    //         res.status(500).json({ error: helpersGeneral.errores.servidor, error });
-    //     }
-    // },
 
     //Activar Donacion
-    
+
     putActivarDonacion: async (req, res) => {
         try {
             const { id } = req.params;

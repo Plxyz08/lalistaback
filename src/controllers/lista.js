@@ -6,7 +6,7 @@ const httpLista = {
     //Obtener todas los listas
     getListas: async (req, res) => {
         try {
-            const listas = await Lista.find().populate('idUser', 'nombre correo');
+            const listas = await Lista.find().populate('idUser', 'nombre correo image');
             if (!listas) {
                 return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
             };
@@ -20,7 +20,7 @@ const httpLista = {
     getListaById: async (req, res) => {
         try {
             const { id } = req.params;
-            const ListaId = await Lista.findById(id).populate('idUser', 'nombre correo');
+            const ListaId = await Lista.findById(id).populate('idUser', 'nombre correo image');
             if (!ListaId) {
                 return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
             };
@@ -34,7 +34,7 @@ const httpLista = {
     getListaByIdUser: async (req, res) => {
         try {
             const { idUser } = req.params;   
-            const lista = await Lista.find({ idUser: idUser }).populate('idUser', 'nombre correo');
+            const lista = await Lista.find({ idUser: idUser }).populate('idUser', 'nombre correo image');
             if (!lista || lista.length === 0) {
                 return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
             };
@@ -47,7 +47,7 @@ const httpLista = {
     // Obtener lista negra
     getListaBlack: async (req, res) => {
         try {
-            const lista = await Lista.find({ tipo: { $regex: 'negra', $options: 'i' } }).populate('idUser', 'nombre correo');
+            const lista = await Lista.find({ tipo: { $regex: 'negra', $options: 'i' } }).populate('idUser', 'nombre correo image');
             if (!lista || lista.length === 0) {
                 return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
             }
@@ -60,7 +60,7 @@ const httpLista = {
     // Obtener lista blanca
     getListaWhite: async (req, res) => {
         try {
-            const lista = await Lista.find({ tipo: { $regex: 'blanca', $options: 'i' } }).populate('idUser', 'nombre correo');
+            const lista = await Lista.find({ tipo: { $regex: 'blanca', $options: 'i' } }).populate('idUser', 'nombre correo image');
             if (!lista || lista.length === 0) {
                 return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
             }
@@ -74,7 +74,7 @@ const httpLista = {
     getListaByCategoria: async (req, res) => {
         try {
             const { categoria } = req.params;
-            const lista = await Lista.find({ categoria: { $regex: categoria, $options: 'i' }}).populate('idUser', 'nombre correo');
+            const lista = await Lista.find({ categoria: { $regex: categoria, $options: 'i' }}).populate('idUser', 'nombre correo image');
             if (!lista || lista.length === 0) {
                 return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
             }
@@ -97,7 +97,7 @@ const httpLista = {
                     $gte: start, 
                     $lte: end 
                 }
-            }).populate('idUser', 'nombre correo');
+            }).populate('idUser', 'nombre correo image');
             if (listas.length === 0) {
                 return res.status(404).json({ 
                     error: 'No se encontraron listas en el rango de fechas.'
