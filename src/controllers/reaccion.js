@@ -2,6 +2,7 @@ import Reaccion from '../models/reaccion.js';
 import User from '../models/user.js';
 import Notificacion from '../models/notificacion.js';
 import helpersGeneral from '../helpers/generales.js';
+import Publicacion from '../models/publicacion.js';
 
 const formatearFecha = (fecha) => {
     const date = new Date(fecha);
@@ -17,7 +18,7 @@ const httpReaccion = {
         try {
             const reacciones = await Reaccion.find().populate('idUser', 'nombre');;
             if (!reacciones) {
-                return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
+                return res.json({ error: helpersGeneral.errores.noEncontrado });
             };
 
             const reaccionConFechaFormateada = reacciones.map((reaccion) => {
@@ -39,7 +40,7 @@ const httpReaccion = {
             const { id } = req.params;
             const reaccion = await Reaccion.findById(id).populate('idUser', 'nombre');;
             if (!reaccion) {
-                return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
+                return res.json({ error: helpersGeneral.errores.noEncontrado });
             };
             const reaccionConFechaFormateada = {
                 ...reaccion.toObject(),
@@ -58,7 +59,7 @@ const httpReaccion = {
             const { idPublicacion } = req.params;
             const reaccion = await Reaccion.find({ idPublicacion: idPublicacion }).populate('idUser', 'nombre');;
             if (!reaccion || reaccion.length === 0) {
-                return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
+                return res.json({ error: helpersGeneral.errores.noEncontrado });
             };
             const reaccionConFechaFormateada = reaccion.map((reaccion) => {
                 return {
@@ -79,7 +80,7 @@ const httpReaccion = {
             const { idUser } = req.params;
             const reacciones = await Reaccion.find({ idUser: idUser }).populate('idUser', 'nombre');;
             if (!reacciones || reacciones.length === 0) {
-                return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
+                return res.json({ error: helpersGeneral.errores.noEncontrado });
             }
             const reaccionConFechaFormateada = reacciones.map((reaccion) => {
                 return {
@@ -136,15 +137,17 @@ const httpReaccion = {
                 idUser,
                 tipo
             });
+            const publicacion = await Publicacion.findById(idPublicacion);
             const nuevaNotificacion = new Notificacion({
-                idUser,
-                idComentario: nuevaReaccion._id,
+                idUser: publicacion.idUser,
+                idReaccion: nuevaReaccion._id,
+                idPublicacion,  
                 tipo: 'reaccion',
                 mensaje: 'Nuevo reaccion en una publicacion'
             });
-
             const reaccionGuardada = await nuevaReaccion.save();
-            res.status(201).json({reaccionGuardada, nuevaNotificacion});
+            const notificacionGuardada = await nuevaNotificacion.save();
+            res.status(201).json({reaccionGuardada, notificacionGuardada});
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor});
         }

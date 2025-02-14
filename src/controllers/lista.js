@@ -112,12 +112,11 @@ const httpLista = {
     // Agregar un nuevo lista
     postAddLista: async (req, res) => {
         try {
-            const { idUser, descripcion, razon, imagen, categoria, tipo} = req.body;
+            const { idUser, descripcion, razon, categoria, tipo} = req.body;
             const nuevaLista = new Lista({
                 idUser,
                 descripcion,
                 razon,
-                imagen,
                 categoria,
                 tipo
             });
@@ -132,7 +131,7 @@ const httpLista = {
     putUpdateLista: async (req, res) => {
         try {
             const { id } = req.params;
-            const {idUser, descripcion, razon, imagen, categoria, tipo } = req.body;
+            const {idUser, descripcion, razon, categoria, tipo } = req.body;
             const user = await User.findById(idUser);
             if (!user) {
                 return res.status(404).json({ error: 'Usuario no encontrado' });
@@ -148,7 +147,7 @@ const httpLista = {
             }
             const listaActualizado = await Lista.findByIdAndUpdate(
                 id,
-                { idUser, descripcion, razon, imagen, categoria, tipo},
+                { idUser, descripcion, razon, categoria, tipo},
                 { new: true }
             );
             res.json(listaActualizado);

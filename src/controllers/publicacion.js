@@ -40,7 +40,7 @@ const httpPublicacion = {
     // Obtener todas las publicaciones
     getPublicaciones: async (req, res) => {
         try {
-            const publicaciones = await Publicacion.find().populate('idUser', '_id nombre imagen');
+            const publicaciones = await Publicacion.find().populate('idUser', '_id nombre image');
             if (!publicaciones || publicaciones.length === 0) {
                 return res.json({ error: helpersGeneral.errores.noEncontrado });
             }
@@ -54,7 +54,7 @@ const httpPublicacion = {
     // Obtener todas las publicaciones activas
     getPublicacionesActivas: async (req, res) => {
         try {
-            const publicaciones = await Publicacion.find({ estado: 'Activa' }).populate('idUser', '_id nombre imagen');
+            const publicaciones = await Publicacion.find({ estado: 'Activa' }).populate('idUser', '_id nombre image');
             if (!publicaciones || publicaciones.length === 0) {
                 return res.json({ error: helpersGeneral.errores.noEncontrado });
             }
@@ -68,7 +68,7 @@ const httpPublicacion = {
     // Obtener todas las publicaciones Pendientes
     getPublicacionesPendientes: async (req, res) => {
         try {
-            const publicaciones = await Publicacion.find({ estado: 'Pendiente' }).populate('idUser', '_id nombre imagen');
+            const publicaciones = await Publicacion.find({ estado: 'Pendiente' }).populate('idUser', '_id nombre image');
             if (!publicaciones || publicaciones.length === 0) {
                 return res.json({ error: helpersGeneral.errores.noEncontrado });
             }
@@ -83,7 +83,7 @@ const httpPublicacion = {
     getPublicacionById: async (req, res) => {
         try {
             const { id } = req.params;
-            const publicacionID = await Publicacion.findById(id).populate('idUser', '_id nombre imagen');
+            const publicacionID = await Publicacion.findById(id).populate('idUser', '_id nombre image');
             if (!publicacionID) {
                 return res.json({ error: helpersGeneral.errores.noEncontrado });
             }
@@ -98,7 +98,7 @@ const httpPublicacion = {
     getPublicacionesByIdUser: async (req, res) => {
         try {
             const { idUser } = req.params;
-            const publicaciones = await Publicacion.find({ idUser: idUser, estado: 'Activa' }).populate('idUser', '_id nombre imagen');
+            const publicaciones = await Publicacion.find({ idUser: idUser, estado: 'Activa' }).populate('idUser', '_id nombre image');
             if (!publicaciones || publicaciones.length === 0) {
                 return res.json({ error: helpersGeneral.errores.noEncontrado });
             }
@@ -123,7 +123,7 @@ const httpPublicacion = {
                     $lte: end
                 },
                 estado: 'Activa'
-            }).populate('idUser', '_id nombre imagen');
+            }).populate('idUser', '_id nombre image');
             if (publicaciones.length === 0) {
                 return res.json({
                     error: 'No se encontraron publicaciones en el rango de fechas.'
@@ -140,7 +140,7 @@ const httpPublicacion = {
     getPublicacionesByTipo: async (req, res) => {
         try {
             const { tipo } = req.params;
-            const publicaciones = await Publicacion.find({ tipo: tipo, estado: 'Activa' }).populate('idUser', '_id nombre imagen');
+            const publicaciones = await Publicacion.find({ tipo: tipo, estado: 'Activa' }).populate('idUser', '_id nombre image');
             if (publicaciones.length === 0) {
                 return res.json({
                     error: 'No se encontraron publicaciones con el tipo especificado.'
