@@ -25,7 +25,7 @@ class Server {
         this.app.use(express.json());
         this.app.use(bodyParser.json());
         this.app.use(cors({
-            origin: ['http://localhost:3000', 'https://lalista.onrender.com'],
+            origin: ['http://localhost:3000', 'https://lalista.onrender.com', 'https://lalista.vercel.app'],
             methods: ['GET', 'POST', 'PUT', 'DELETE'],
             allowedHeaders: ['Content-Type', 'Authorization', 'x-token']
         }));
