@@ -20,8 +20,10 @@ const helpersUsuario = {
         const existe = await User.findOne({ nombre });
 
         if (existe) {
-            if (req.req.method === "PUT" && req.req.body._id != existe._id) {
-                throw new Error('Ya existe ese nombre en la base de datos');
+            if (req.req.method === "PUT") {
+                if (req.req.usuario._id != existe._id) {
+                    throw new Error('Ya existe ese nombre en la base de datos');
+                }
             } else if (req.req.method === "POST") {
                 throw new Error('Ya existe ese nombre en la base de datos');
             }
@@ -89,7 +91,7 @@ const helpersUsuario = {
         // (?=.*\d) - Al menos un número
         // (?=.*[!@#$%^&(),.?":{}|<>]) - Al menos un caracter especial
         // .{8,} - Mínimo 8 caracteres
-        const vali = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+        const vali = /^(?=.[A-Z])(?=.[a-z])(?=.\d)(?=.[!@#$%^&*(),.?":{}|<>]).{8,}$/;
         if (!vali.test(clave)) {
             throw new Error("La contraseña debe tener al menos 1 mayúscula, 1 minúscula, 1 número, 1 caracter especial y mínimo 8 caracteres");
         }

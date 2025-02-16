@@ -85,7 +85,7 @@ router.put("/editar/:id", [
     check('id', 'Identificador requerido').not().isEmpty(),
     check('id', 'Identificador requerido').isMongoId(),
     check('nombre', 'El nombre es obligatorio').not().isEmpty(),
-    // check('nombre').custom(helpersUsuario.existeNombre),
+    check('nombre').custom(helpersUsuario.existeNombre),
     check('correo', 'El correo es obligatorio').isEmail(),
     validarCampos,
 ], httpUser.putUserUpdate);
