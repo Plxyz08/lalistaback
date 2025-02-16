@@ -5,7 +5,6 @@ const listaSchema = new mongoose.Schema({
     descripcion: { type: String, required: true },
     razon: { type: String, required: true },
     categoria: { type: String, required: true },
-    image: { type: String, },
     tipo: { type: String, required: true },
     createAT: { type: Date, default: Date.now },
     estado: { type: Boolean, default: 1 }
