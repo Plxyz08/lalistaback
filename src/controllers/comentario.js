@@ -60,7 +60,7 @@ const httpComentario = {
             const { idPublicacion } = req.params;
             const comentario = await Comentario.find({ idPublicacion: idPublicacion }).populate('idUser', '_id nombre image');;
             if (!comentario || comentario.length === 0) {
-                return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
+                return res.json([]);
             };
             const comentariosConFechaFormateada = comentario.map((comentario) => {
                 return {
