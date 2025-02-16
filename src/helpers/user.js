@@ -17,23 +17,37 @@ const helpersUsuario = {
     },
 
     existeNombre: async (nombre, req) => {
-        const existe = await User.findOne({ nombre });
-
-        if (existe) {
-            if (req.req.method === "PUT") {
-                if (req.req.usuario._id != existe._id) {
-                    throw new Error('Ya existe ese nombre en la base de datos');
-                }
-            } else if (req.req.method === "POST") {
-                throw new Error('Ya existe ese nombre en la base de datos');
+        try {
+            const { method, usuario, body } = req.req;
+            const existingUser = await User.findOne({ nombre });
+    
+            if (method === "GET" && !existingUser) {
+                throw new Error('El nombre no se encuentra registrado');
             }
+    
+            if (existingUser) {
+                switch (method) {
+                    case "PUT":
+                        const existingUserId = existingUser._id.toString();
+                        const currentUserId = usuario._id.toString();
+                        
+                        if (existingUserId !== currentUserId) {
+                            throw new Error('Ya existe un usuario con ese nombre');
+                        }
+                        break;
+    
+                    case "POST":
+                        throw new Error('Ya existe un usuario con ese nombre');
+                        break;
+                }
+            }
+    
+            req.req.UserUpdate = existingUser;
+            
+            return true;
+        } catch (error) {
+            throw error;
         }
-
-        if (!existe && req.req.method === "GET") {
-            throw new Error('El nombre no se encuentra registrado');
-        }
-
-        req.req.UserUpdate = existe;
     },
 
     desactivarAdmin: async (id, req) => {
