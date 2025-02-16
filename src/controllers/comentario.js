@@ -16,7 +16,7 @@ const httpComentario = {
     //Obtener todos los comentarios
     getComentarios: async (req, res) => {
         try {
-            const comentarios = await Comentario.find().populate('idUser', 'nombre', 'image');
+            const comentarios = await Comentario.find().populate('idUser', 'nombre', '_id nombre image');
             if (!comentarios || comentarios.length === 0) {
                 return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
             }
@@ -38,7 +38,7 @@ const httpComentario = {
     getComentarioById: async (req, res) => {
         try {
             const { id } = req.params;
-            const comentario = await Comentario.findById(id).populate('idUser', 'nombre', 'image');
+            const comentario = await Comentario.findById(id).populate('idUser', 'nombre', '_id nombre image');
             if (!comentario) {
                 return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
             }
@@ -58,7 +58,7 @@ const httpComentario = {
     getComentarioByIdPublicacion: async (req, res) => {
         try {
             const { idPublicacion } = req.params;
-            const comentario = await Comentario.find({ idPublicacion: idPublicacion }).populate('idUser', 'nombre', 'image');;
+            const comentario = await Comentario.find({ idPublicacion: idPublicacion }).populate('idUser', 'nombre', '_id nombre image');;
             if (!comentario || comentario.length === 0) {
                 return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
             };
@@ -79,7 +79,7 @@ const httpComentario = {
     getComentariosByIdUser: async (req, res) => {
         try {
             const { idUser } = req.params;
-            const comentarios = await Comentario.find({ idUser: idUser }).populate('idUser', 'nombre', 'image');;
+            const comentarios = await Comentario.find({ idUser: idUser }).populate('idUser', 'nombre', '_id nombre image');;
             if (!comentarios || comentarios.length === 0) {
                 return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
             }
