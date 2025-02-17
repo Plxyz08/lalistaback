@@ -34,11 +34,9 @@ router.get("/date/:startDate/:endDate", [
 ], httpLista.getListaByDateRange);
 
 router.get("/list/black", [
-    validarJWT,
 ], httpLista.getListaBlack);
 
 router.get("/list/white", [
-    validarJWT,
 ], httpLista.getListaWhite);
 
 router.get("/categoria/:categoria", [
