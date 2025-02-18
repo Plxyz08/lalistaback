@@ -4,7 +4,6 @@ import { validarJWT } from '../middlewares/validar-jwt.js';
 import validarCampos from '../middlewares/validar-campos.js';
 import httpLista from '../controllers/lista.js';
 import helpersUsuario from '../helpers/user.js';
-import { validarRolAdmin } from '../middlewares/validar-rol.js';
 
 const router = Router();
 
@@ -106,7 +105,6 @@ router.post("/perfil", [
 
 router.put("/aceptar/:id", [
     validarJWT,
-    validarRolAdmin,
     check('id', 'Identificador requerido').not().isEmpty(),
     check('id', 'Identificador requerido').isMongoId(),
     validarCampos,
@@ -114,7 +112,6 @@ router.put("/aceptar/:id", [
 
 router.put("/rechazar/:id", [
     validarJWT,
-    validarRolAdmin,
     check('id', 'Identificador requerido').not().isEmpty(),
     check('id', 'Identificador requerido').isMongoId(),
     validarCampos,
