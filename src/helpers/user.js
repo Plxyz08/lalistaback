@@ -105,9 +105,17 @@ const helpersUsuario = {
         // (?=.*\d) - Al menos un número
         // (?=.*[!@#$%^&(),.?":{}|<>]) - Al menos un caracter especial
         // .{8,} - Mínimo 8 caracteres
-        const vali = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+
+        
+        // const vali = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+        // if (!vali.test(clave)) {
+        //     throw new Error("La contraseña debe tener al menos 1 mayúscula, 1 minúscula, 1 número, 1 caracter especial y mínimo 8 caracteres");
+        // }
+
+        // Nueva validación: al menos 6 caracteres y 1 número
+        const vali = /^(?=.*\d).{6,}$/;
         if (!vali.test(clave)) {
-            throw new Error("La contraseña debe tener al menos 1 mayúscula, 1 minúscula, 1 número, 1 caracter especial y mínimo 8 caracteres");
+            throw new Error("La contraseña debe tener al menos 6 caracteres y 1 número");
         }
         return true;
     }
