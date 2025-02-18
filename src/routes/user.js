@@ -115,4 +115,10 @@ router.delete("/eliminar/:id", [
     validarCampos,
 ], httpUser.deleteUsuario);
 
+router.post("/sendNoticias", [
+    check('asunto', 'El asunto es obligatorio').not().isEmpty(),
+    check('contenido', 'La contenido es obligatoria').not().isEmpty(),
+    validarCampos,
+], httpUser.sendNoticias);
+
 export default router;

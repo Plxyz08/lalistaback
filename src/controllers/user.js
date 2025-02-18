@@ -333,7 +333,142 @@ const hhtpUser = {
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor });
         }
-    }
+    },
+
+    // Enviar Noticias
+    sendNoticias: async (req, res) => {
+        try {
+            const { asunto, contenido, imagen } = req.body;
+    
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: process.env.userEmail,
+                    pass: process.env.password,
+                },
+            });
+    
+            const users = await User.find({ rol: 'user' });
+            const sendMailPromises = users.map(user => {
+                const mailOptions = {
+                    from: process.env.userEmail,
+                    to: 'jhonmejia573@gmail.com',
+                    subject: asunto,
+                    html: `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Correo de Noticias</title>
+                        <style>
+                            body {
+                                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                                background-color: #f4f4f4;
+                                margin: 0;
+                                padding: 0;
+                            }
+                            .email-container {
+                                max-width: 600px;
+                                margin: 20px auto;
+                                background-color: #ffffff;
+                                border-radius: 8px;
+                                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                                overflow: hidden;
+                            }
+                            .email-header {
+                                background: hsl(43, 74%, 49%);
+                                color: white;
+                                padding: 30px 20px;
+                                text-align: center;
+                                font-size: 24px;
+                                font-weight: bold;
+                            }
+                            .email-body {
+                                padding: 30px 20px;
+                                text-align: center;
+                            }
+                            .content-text {
+                                font-size: 16px;
+                                color: #333333;
+                                margin-bottom: 20px;
+                                line-height: 1.6;
+                            }
+                            .image-container {
+                                margin: 20px 0;
+                                text-align: center;
+                            }
+                            .content-image {
+                                max-width: 100%;
+                                height: auto;
+                                border-radius: 8px;
+                                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                            }
+                            .button-container {
+                                margin: 30px 0;
+                                text-align: center;
+                            }
+                            .cta-button {
+                                display: inline-block;
+                                background-color: hsl(43, 74%, 49%);
+                                color: white;
+                                padding: 12px 24px;
+                                border-radius: 6px;
+                                text-decoration: none;
+                                font-size: 16px;
+                                font-weight: bold;
+                            }
+                            .cta-button:hover {
+                                background-color: hsl(43, 74%, 39%);
+                            }
+                            .cta-button:link, .cta-button:visited {
+                                color: white;
+                            }
+                            .footer {
+                                background-color: #f8f9fa;
+                                padding: 15px;
+                                text-align: center;
+                                font-size: 14px;
+                                color: #666666;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="email-container">
+                            <div class="email-header">
+                                ${asunto}
+                            </div>
+                            <div class="email-body">
+                                <p class="content-text">${contenido}</p>
+
+                                ${imagen ? `
+                                    <div class="image-container">
+                                        <img src="${imagen}" alt="Contenido relacionado" class="content-image">
+                                    </div>
+                                    ` : ''}
+                                <div class="button-container">
+                                    <a href="https://lalistawbc.com" target="_blank" class="cta-button" style="color: white">Visita nuestra página web</a>
+                                </div>
+                            </div>
+                            <div class="footer">
+                                © ${new Date().getFullYear()} La Lista WBC. Todos los derechos reservados.
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                    `,
+                };
+    
+                return transporter.sendMail(mailOptions);
+            });
+    
+            await Promise.all(sendMailPromises);
+    
+            res.json({ message: 'Noticias enviadas exitosamente' });
+        } catch (error) {
+            res.status(500).json({ error: helpersGeneral.errores.servidor });
+        }
+    },
 };
 
 export default hhtpUser;
