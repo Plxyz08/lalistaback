@@ -262,9 +262,8 @@ const hhtpUser = {
     putCambioPassword: async (req, res) => {
         try {
             const { id } = req.params;
-            const { password, newPassword } = req.body;
+            const { password, nuevaPassword } = req.body;
             const usuario = await User.findById(id);
-
             if (!usuario) {
                 return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
             };
@@ -281,7 +280,7 @@ const hhtpUser = {
             };
 
             const salt = bcrypt.genSaltSync();
-            const newPasswordHash = bcrypt.hashSync(newPassword, salt);
+            const newPasswordHash = bcrypt.hashSync(nuevaPassword, salt);
             await User.findByIdAndUpdate(id, { password: newPasswordHash }, { new: true });
             return res.status(200).json({ message: "Contraseña actualizada" });
         } catch (error) {
