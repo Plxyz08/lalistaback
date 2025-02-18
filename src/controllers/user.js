@@ -352,7 +352,7 @@ const hhtpUser = {
             const sendMailPromises = users.map(user => {
                 const mailOptions = {
                     from: process.env.userEmail,
-                    to: 'jhonmejia573@gmail.com',
+                    to: user.correo,
                     subject: asunto,
                     html: `
                     <!DOCTYPE html>
