@@ -245,30 +245,14 @@ const hhtpUser = {
     //Establecer nueva Contraseña
     nuevaPassword: async (req, res) => {
         try {
-            const { codigo, password } = req.body;
+            const { password } = req.body;
 
-            const { codigo: codigoGuardado, fechaCreacion } = codigoEnviado;
-            const tiempoExpiracion = 30;
+            const usuario = req.UserUpdate;
+            const salt = bcrypt.genSaltSync();
+            const newPasswordHash = bcrypt.hashSync(password, salt);
 
-            const tiempoActual = new Date();
-            const tiempoTranscurrido = tiempoActual - new Date(fechaCreacion);
-            const tiempoMinutos = Math.round(tiempoTranscurrido / (1000 * 60));
-
-            if (tiempoMinutos > tiempoExpiracion) {
-                res.status(400).json({ error: 'El código ha expirado' });
-            }
-
-            if (codigo === Number(codigoGuardado)) {
-                codigoEnviado = {};
-                const usuario = req.UserUpdate;
-                const salt = bcrypt.genSaltSync();
-                const newPasswordHash = bcrypt.hashSync(password, salt);
-
-                await User.findByIdAndUpdate(usuario.id, { password: newPasswordHash }, { new: true });
-                return res.status(200).json({ message: 'Contraseña actualizada' });
-            }
-
-            return res.status(400).json({ error: 'Código incorrecto' });
+            await User.findByIdAndUpdate(usuario.id, { password: newPasswordHash }, { new: true });
+            return res.status(200).json({ message: 'Contraseña actualizada' });
         } catch (error) {
             return res.status(500).json({ error: helpersGeneral.errores.servidor });
         }
