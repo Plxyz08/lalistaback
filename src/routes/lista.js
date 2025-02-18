@@ -4,6 +4,7 @@ import { validarJWT } from '../middlewares/validar-jwt.js';
 import validarCampos from '../middlewares/validar-campos.js';
 import httpLista from '../controllers/lista.js';
 import helpersUsuario from '../helpers/user.js';
+import { validarRolAdmin } from '../middlewares/validar-rol.js';
 
 const router = Router();
 
@@ -91,5 +92,38 @@ router.delete("/eliminar/:id", [
     check('id', 'Identificador requerido').isMongoId(),
     validarCampos,
 ], httpLista.deleteLista);
+
+router.post("/perfil", [
+    validarJWT,
+    check('idUser', 'Identificador del usuario requerido').not().isEmpty(),
+    check('idUser', 'Identificador del usuario requerido').isMongoId(),
+    check('descripcion', 'Descripción requerida').not().isEmpty(),
+    check('razon', 'Razón requerida').not().isEmpty(),
+    check('categoria', 'Categoría requerida').not().isEmpty(),
+    check('tipo', 'Tipo requerido').not().isEmpty(),
+    validarCampos,
+], httpLista.perfilListaPorUsuario);
+
+router.put("/aceptar/:id", [
+    validarJWT,
+    validarRolAdmin,
+    check('id', 'Identificador requerido').not().isEmpty(),
+    check('id', 'Identificador requerido').isMongoId(),
+    validarCampos,
+], httpLista.aceptarPerfilLista);
+
+router.put("/rechazar/:id", [
+    validarJWT,
+    validarRolAdmin,
+    check('id', 'Identificador requerido').not().isEmpty(),
+    check('id', 'Identificador requerido').isMongoId(),
+    validarCampos,
+], httpLista.rechazarPerfilLista);
+
+router.get("/estado/:estado", [
+    validarJWT,
+    check('estado', 'Estado requerido').not().isEmpty(),
+    validarCampos,
+], httpLista.getPerfilesByEstado);
 
 export default router;

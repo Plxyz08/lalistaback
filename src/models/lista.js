@@ -7,7 +7,8 @@ const listaSchema = new mongoose.Schema({
     categoria: { type: String, required: true },
     tipo: { type: String, required: true },
     createAT: { type: Date, default: Date.now },
-    estado: { type: Boolean, default: 1 }
+    estado: { type: String, enum: ['pendiente', 'aceptado', 'rechazado'], default: 'pendiente' },
+    imagen: { type: String }
 });
 
 export default mongoose.model('Lista', listaSchema);

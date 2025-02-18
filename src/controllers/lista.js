@@ -1,5 +1,6 @@
 import Lista from '../models/lista.js';
 import User from '../models/user.js';
+import Notificacion from '../models/notificacion.js';
 import helpersGeneral from '../helpers/generales.js';
 
 const httpLista = {
@@ -112,13 +113,19 @@ const httpLista = {
     // Agregar un nuevo lista
     postAddLista: async (req, res) => {
         try {
-            const { idUser, descripcion, razon, categoria, tipo} = req.body;
+            const { idUser, descripcion, razon, categoria, tipo, imagen } = req.body;
+            const listaExistente = await Lista.findOne({ idUser, tipo });
+            if (listaExistente) {
+                return res.status(400).json({ error: 'El usuario ya está en esta lista' });
+            }
             const nuevaLista = new Lista({
                 idUser,
                 descripcion,
                 razon,
                 categoria,
-                tipo
+                tipo,
+                imagen,
+                estado: 'pendiente'
             });
             const listaGuardado = await nuevaLista.save();
             res.status(201).json(listaGuardado);
@@ -131,7 +138,7 @@ const httpLista = {
     putUpdateLista: async (req, res) => {
         try {
             const { id } = req.params;
-            const {idUser, descripcion, razon, categoria, tipo } = req.body;
+            const { idUser, descripcion, razon, categoria, tipo, imagen } = req.body;
             const user = await User.findById(idUser);
             if (!user) {
                 return res.status(404).json({ error: 'Usuario no encontrado' });
@@ -143,11 +150,15 @@ const httpLista = {
                 return res.status(404).json({ error: helpersGeneral.errores.noEncontrado });
             }
             if (lista.idUser.toString() !== userId && userRole !== 'admin') {
-                return res.status(403).json({ error: 'No tienes permiso para editar este lista' });
+                return res.status(403).json({ error: 'No tienes permiso para editar esta lista' });
+            }
+            const listaExistente = await Lista.findOne({ idUser, tipo, _id: { $ne: id } });
+            if (listaExistente) {
+                return res.status(400).json({ error: 'El usuario ya está en esta lista' });
             }
             const listaActualizado = await Lista.findByIdAndUpdate(
                 id,
-                { idUser, descripcion, razon, categoria, tipo},
+                { idUser, descripcion, razon, categoria, tipo, imagen },
                 { new: true }
             );
             res.json(listaActualizado);
@@ -187,7 +198,77 @@ const httpLista = {
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor, error });
         }
-    }
+    },
+
+    perfilListaPorUsuario: async (req, res) => {
+        try {
+            const { idUser, descripcion, razon, categoria, tipo, imagen } = req.body;
+            const nuevaLista = new Lista({
+                idUser,
+                descripcion,
+                razon,
+                categoria,
+                tipo,
+                imagen,
+                estado: 'pendiente'
+            });
+            const listaGuardado = await nuevaLista.save();
+
+            // Crear notificaciones para los administradores
+            const user = await User.findById(idUser);
+            const userAdmin = await User.find({ rol: 'admin' });
+            const notificaciones = [];
+            for (const admin of userAdmin) {
+                const nuevaNotificacion = new Notificacion({
+                    idUser: admin._id,
+                    tipo: 'Perfil',
+                    mensaje: `El usuario ${user.nombre} ha creado un nuevo perfil para la lista ${tipo}.`
+                });
+                await nuevaNotificacion.save();
+                notificaciones.push(nuevaNotificacion);
+            }
+
+            res.status(201).json({ listaGuardado, notificaciones });
+        } catch (error) {
+            res.status(500).json({ error: helpersGeneral.errores.servidor, error });
+        }
+    },
+
+    // Aceptar perfil de lista
+    aceptarPerfilLista: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const lista = await Lista.findByIdAndUpdate(id, { estado: 'aceptado' }, { new: true });
+            res.json(lista);
+        } catch (error) {
+            res.status(500).json({ error: helpersGeneral.errores.servidor, error });
+        }
+    },
+
+    // Rechazar perfil de lista
+    rechazarPerfilLista: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const lista = await Lista.findByIdAndUpdate(id, { estado: 'rechazado' }, { new: true });
+            res.json(lista);
+        } catch (error) {
+            res.status(500).json({ error: helpersGeneral.errores.servidor, error });
+        }
+    },
+
+    // Obtener perfiles de lista por estado
+    getPerfilesByEstado: async (req, res) => {
+        try {
+            const { estado } = req.params;
+            const listas = await Lista.find({ estado }).populate('idUser', 'nombre correo image');
+            if (!listas || listas.length === 0) {
+                return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
+            }
+            res.json(listas);
+        } catch (error) {
+            res.status(500).json({ error: helpersGeneral.errores.servidor, error });
+        }
+    },
 };
 
 export default httpLista;
