@@ -117,10 +117,11 @@ router.put("/rechazar/:id", [
     validarCampos,
 ], httpLista.rechazarPerfilLista);
 
-router.get("/estado/:estado", [
+router.get("/estado", [
     validarJWT,
     check('estado', 'Estado requerido').not().isEmpty(),
-    validarCampos,
+    check('tipo', 'Tipo requerido').not().isEmpty(),
+    validarCampos
 ], httpLista.getPerfilesByEstado);
 
 export default router;
