@@ -118,7 +118,6 @@ router.put("/rechazar/:id", [
 ], httpLista.rechazarPerfilLista);
 
 router.get("/estado/:estado", [
-    validarJWT,
     check('estado', 'Estado requerido').not().isEmpty(),
     validarCampos,
 ], httpLista.getPerfilesByEstado);
