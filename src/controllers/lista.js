@@ -259,10 +259,10 @@ const httpLista = {
     // Obtener perfiles de lista por estado
     getPerfilesByEstado: async (req, res) => {
         try {
-            const { estado, tipo } = req.query;
-            const listas = await Lista.find({ estado, tipo }).populate('idUser', 'nombre correo image');
+            const { estado } = req.params;
+            const listas = await Lista.find({ estado }).populate('idUser', 'nombre correo image');
             if (!listas || listas.length === 0) {
-                return res.json([]);
+                return res.status(400).json({ error: helpersGeneral.errores.noEncontrado });
             }
             res.json(listas);
         } catch (error) {
