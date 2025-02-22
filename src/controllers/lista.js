@@ -204,17 +204,6 @@ const httpLista = {
         try {
             const { idUser, descripcion, razon, categoria, tipo, imagen } = req.body;
     
-            // Verificar que req.user esté definido
-            if (!req.user) {
-                return res.status(400).json({ error: 'Usuario no autenticado' });
-            }
-    
-            // Verificar que idUser sea válido
-            const user = await User.findById(idUser);
-            if (!user) {
-                return res.status(404).json({ error: 'Usuario no encontrado' });
-            }
-    
             const nuevaLista = new Lista({
                 idUser,
                 descripcion,
@@ -227,13 +216,14 @@ const httpLista = {
             const listaGuardado = await nuevaLista.save();
     
             // Crear notificaciones para los administradores
+            const user = await User.findById(idUser);
             const userAdmin = await User.find({ rol: 'admin' });
             const notificaciones = [];
             for (const admin of userAdmin) {
                 const nuevaNotificacion = new Notificacion({
                     idUser: admin._id,
                     tipo: 'Perfil',
-                    mensaje: `El usuario ${req.user.nombre} ha creado un nuevo perfil para la lista ${tipo} con el usuario ${user.nombre}.`
+                    mensaje: `Se creo el perfil del usuario ${user.nombre} para la lista ${tipo}.`
                 });
                 await nuevaNotificacion.save();
                 notificaciones.push(nuevaNotificacion);
