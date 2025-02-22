@@ -28,23 +28,23 @@ const validarJWT = async (req, res, next) => {
         const token = req.header("x-token");
         if (!token) {
             return res.status(401).json({
-                error: "No hay token en la peticion",
+                error: "No hay token en la petición",
             });
         }
 
         const { uid } = jwt.verify(token, process.env.secretKey);
 
-        let usuario = await User.findById(uid);
+        const usuario = await User.findById(uid);
 
         if (!usuario) {
             return res.status(401).json({
-                error: "Token no válido", //- usuario no existe DB
+                error: "Token no válido - usuario no existe en DB",
             });
         }
 
-        if (usuario.estado == 0) {
+        if (usuario.estado === 0) {
             return res.status(401).json({
-                error: "Token no válido", //- usuario con estado: false
+                error: "Token no válido - usuario con estado: false",
             });
         }
         req.usuario = usuario;

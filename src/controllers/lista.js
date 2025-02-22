@@ -241,8 +241,8 @@ const httpLista = {
         try {
             const { id } = req.params;
             const lista = await Lista.findByIdAndUpdate(id, { estado: 'aceptado' }, { new: true });
-            
-            // Crear notificación para el usuario
+
+            // Crear notificación para el usuario que está en la lista
             const user = await User.findById(lista.idUser);
             const nuevaNotificacion = new Notificacion({
                 idUser: user._id,
@@ -250,6 +250,15 @@ const httpLista = {
                 mensaje: `Tu perfil para la lista ${lista.tipo} ha sido aceptado.`
             });
             await nuevaNotificacion.save();
+
+            // Crear notificación para el usuario que creó el perfil
+            const userCreador = req.usuario;
+            const notificacionCreador = new Notificacion({
+                idUser: userCreador._id,
+                tipo: 'Perfil',
+                mensaje: `Has aceptado el perfil del usuario ${user.nombre} para la lista ${lista.tipo}.`
+            });
+            await notificacionCreador.save();
 
             res.json(lista);
         } catch (error) {
@@ -262,8 +271,8 @@ const httpLista = {
         try {
             const { id } = req.params;
             const lista = await Lista.findByIdAndUpdate(id, { estado: 'rechazado' }, { new: true });
-            
-            // Crear notificación para el usuario
+
+            // Crear notificación para el usuario que está en la lista
             const user = await User.findById(lista.idUser);
             const nuevaNotificacion = new Notificacion({
                 idUser: user._id,
@@ -271,6 +280,15 @@ const httpLista = {
                 mensaje: `Tu perfil para la lista ${lista.tipo} ha sido rechazado.`
             });
             await nuevaNotificacion.save();
+
+            // Crear notificación para el usuario que creó el perfil
+            const userCreador = req.usuario;
+            const notificacionCreador = new Notificacion({
+                idUser: userCreador._id,
+                tipo: 'Perfil',
+                mensaje: `Has rechazado el perfil del usuario ${user.nombre} para la lista ${lista.tipo}.`
+            });
+            await notificacionCreador.save();
 
             res.json(lista);
         } catch (error) {
