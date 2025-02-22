@@ -213,7 +213,7 @@ const httpLista = {
                 estado: 'pendiente'
             });
             const listaGuardado = await nuevaLista.save();
-
+    
             // Crear notificaciones para los administradores
             const user = await User.findById(idUser);
             const userAdmin = await User.find({ rol: 'admin' });
@@ -222,12 +222,12 @@ const httpLista = {
                 const nuevaNotificacion = new Notificacion({
                     idUser: admin._id,
                     tipo: 'Perfil',
-                    mensaje: `El usuario ${user.nombre} ha creado un nuevo perfil para la lista ${tipo}.`
+                    mensaje: `El usuario ${req.user.nombre} ha creado un nuevo perfil para la lista ${tipo} con el usuario ${user.nombre}.`
                 });
                 await nuevaNotificacion.save();
                 notificaciones.push(nuevaNotificacion);
             }
-
+    
             res.status(201).json({ listaGuardado, notificaciones });
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor, error });
@@ -239,6 +239,16 @@ const httpLista = {
         try {
             const { id } = req.params;
             const lista = await Lista.findByIdAndUpdate(id, { estado: 'aceptado' }, { new: true });
+            
+            // Crear notificación para el usuario
+            const user = await User.findById(lista.idUser);
+            const nuevaNotificacion = new Notificacion({
+                idUser: user._id,
+                tipo: 'Perfil',
+                mensaje: `Tu perfil para la lista ${lista.tipo} ha sido aceptado.`
+            });
+            await nuevaNotificacion.save();
+
             res.json(lista);
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor, error });
@@ -250,6 +260,16 @@ const httpLista = {
         try {
             const { id } = req.params;
             const lista = await Lista.findByIdAndUpdate(id, { estado: 'rechazado' }, { new: true });
+            
+            // Crear notificación para el usuario
+            const user = await User.findById(lista.idUser);
+            const nuevaNotificacion = new Notificacion({
+                idUser: user._id,
+                tipo: 'Perfil',
+                mensaje: `Tu perfil para la lista ${lista.tipo} ha sido rechazado.`
+            });
+            await nuevaNotificacion.save();
+
             res.json(lista);
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor, error });
