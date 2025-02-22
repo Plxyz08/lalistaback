@@ -203,6 +203,18 @@ const httpLista = {
     perfilListaPorUsuario: async (req, res) => {
         try {
             const { idUser, descripcion, razon, categoria, tipo, imagen } = req.body;
+    
+            // Verificar que req.user esté definido
+            if (!req.user) {
+                return res.status(400).json({ error: 'Usuario no autenticado' });
+            }
+    
+            // Verificar que idUser sea válido
+            const user = await User.findById(idUser);
+            if (!user) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
+            }
+    
             const nuevaLista = new Lista({
                 idUser,
                 descripcion,
@@ -215,7 +227,6 @@ const httpLista = {
             const listaGuardado = await nuevaLista.save();
     
             // Crear notificaciones para los administradores
-            const user = await User.findById(idUser);
             const userAdmin = await User.find({ rol: 'admin' });
             const notificaciones = [];
             for (const admin of userAdmin) {
@@ -230,6 +241,7 @@ const httpLista = {
     
             res.status(201).json({ listaGuardado, notificaciones });
         } catch (error) {
+            console.error('Error al crear el perfil de la lista:', error);
             res.status(500).json({ error: helpersGeneral.errores.servidor, error });
         }
     },
