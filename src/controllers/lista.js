@@ -171,8 +171,18 @@ const httpLista = {
     putActivarLista: async (req, res) => {
         try {
             const { id } = req.params;
-            const lista = await Lista.findByIdAndUpdate(id, { estado: 1 }, { new: true });
-            res.json(lista);
+            const lista = await Lista.findByIdAndUpdate(id, { estado: 'aceptado' }, { new: true });
+
+            // Crear notificación para el usuario que está en la lista
+            const user = await User.findById(lista.idUser);
+            const notificacion = new Notificacion({
+                idUser: user._id,
+                tipo: 'Lista_aceptada',
+                mensaje: `Se ha aceptado tu perfil para la lista ${lista.tipo}.`
+            });
+            await notificacion.save();
+
+            res.json({ lista, notificacion });
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor, error });
         }
@@ -182,8 +192,18 @@ const httpLista = {
     putInactivarLista: async (req, res) => {
         try {
             const { id } = req.params;
-            const lista = await Lista.findByIdAndUpdate(id, { estado: 0 }, { new: true });
-            res.json(lista);
+            const lista = await Lista.findByIdAndUpdate(id, { estado: 'rechazado' }, { new: true });
+
+            // Crear notificación para el usuario que está en la lista
+            const user = await User.findById(lista.idUser);
+            const notificacion = new Notificacion({
+                idUser: user._id,
+                tipo: 'Lista_rechazada',
+                mensaje: `Se ha rechazado tu perfil para la lista ${lista.tipo}.`
+            });
+            await notificacion.save();
+
+            res.json({ lista, notificacion });
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor, error });
         }
@@ -232,66 +252,6 @@ const httpLista = {
             res.status(201).json({ listaGuardado, notificaciones });
         } catch (error) {
             console.error('Error al crear el perfil de la lista:', error);
-            res.status(500).json({ error: helpersGeneral.errores.servidor, error });
-        }
-    },
-
-    // Aceptar perfil de lista
-    aceptarPerfilLista: async (req, res) => {
-        try {
-            const { id } = req.params;
-            const lista = await Lista.findByIdAndUpdate(id, { estado: 'aceptado' }, { new: true });
-
-            // Crear notificación para el usuario que está en la lista
-            const user = await User.findById(lista.idUser);
-            const nuevaNotificacion = new Notificacion({
-                idUser: user._id,
-                tipo: 'Perfil',
-                mensaje: `Tu perfil para la lista ${lista.tipo} ha sido aceptado.`
-            });
-            await nuevaNotificacion.save();
-
-            // Crear notificación para el usuario que creó el perfil
-            const userCreador = req.usuario;
-            const notificacionCreador = new Notificacion({
-                idUser: userCreador._id,
-                tipo: 'Perfil',
-                mensaje: `Has aceptado el perfil del usuario ${user.nombre} para la lista ${lista.tipo}.`
-            });
-            await notificacionCreador.save();
-
-            res.json(lista);
-        } catch (error) {
-            res.status(500).json({ error: helpersGeneral.errores.servidor, error });
-        }
-    },
-
-    // Rechazar perfil de lista
-    rechazarPerfilLista: async (req, res) => {
-        try {
-            const { id } = req.params;
-            const lista = await Lista.findByIdAndUpdate(id, { estado: 'rechazado' }, { new: true });
-
-            // Crear notificación para el usuario que está en la lista
-            const user = await User.findById(lista.idUser);
-            const nuevaNotificacion = new Notificacion({
-                idUser: user._id,
-                tipo: 'Perfil',
-                mensaje: `Tu perfil para la lista ${lista.tipo} ha sido rechazado.`
-            });
-            await nuevaNotificacion.save();
-
-            // Crear notificación para el usuario que creó el perfil
-            const userCreador = req.usuario;
-            const notificacionCreador = new Notificacion({
-                idUser: userCreador._id,
-                tipo: 'Perfil',
-                mensaje: `Has rechazado el perfil del usuario ${user.nombre} para la lista ${lista.tipo}.`
-            });
-            await notificacionCreador.save();
-
-            res.json(lista);
-        } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor, error });
         }
     },
