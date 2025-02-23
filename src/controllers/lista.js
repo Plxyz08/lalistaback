@@ -167,39 +167,45 @@ const httpLista = {
         }
     },
 
-    //Activar Publicacion
+    // Activar lista
     putActivarLista: async (req, res) => {
         try {
             const { id } = req.params;
             const lista = await Lista.findByIdAndUpdate(id, { estado: 'aceptado' }, { new: true });
+
+            // Crear notificación para el usuario que está en la lista
+            const user = await User.findById(lista.idUser);
             const notificacion = new Notificacion({
-                idUser: lista.idUser,
-                idPublicacion: lista._id,
+                idUser: user._id,
                 tipo: 'Lista_aceptada',
-                mensaje: `Se ha aprobado tu perfil para la lista ${lista.tipo}.`
+                mensaje: `Se ha aceptado tu perfil para la lista ${lista.tipo}.`
             });
             await notificacion.save();
-            res.json({lista, notificacion});
+
+            res.json({ lista, notificacion });
         } catch (error) {
-            res.status(500).json({ error: helpersGeneral.errores.servidor });
+            res.status(500).json({ error: helpersGeneral.errores.servidor, error });
         }
     },
 
-    //Inactivar Publicacion
+    // Inactivar lista
     putInactivarLista: async (req, res) => {
         try {
             const { id } = req.params;
             const lista = await Lista.findByIdAndUpdate(id, { estado: 'rechazado' }, { new: true });
+
+            // Crear notificación para el usuario que está en la lista
+            const user = await User.findById(lista.idUser);
             const notificacion = new Notificacion({
-                idUser: lista.idUser,
-                idPublicacion: lista._id,
-                tipo: 'Publicacion_reject',
+                idUser: user._id,
+                tipo: 'Lista_rechazada',
                 mensaje: `Se ha rechazado tu perfil para la lista ${lista.tipo}.`
             });
             await notificacion.save();
-            res.json({lista, notificacion});
+
+            res.json({ lista, notificacion });
         } catch (error) {
-            res.status(500).json({ error: helpersGeneral.errores.servidor });
+            res.status(500).json({ error: helpersGeneral.errores.servidor, error });
         }
     },
 
