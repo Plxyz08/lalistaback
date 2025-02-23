@@ -167,45 +167,39 @@ const httpLista = {
         }
     },
 
-    //Activar lista
+    //Activar Publicacion
     putActivarLista: async (req, res) => {
         try {
             const { id } = req.params;
             const lista = await Lista.findByIdAndUpdate(id, { estado: 'aceptado' }, { new: true });
-
-            // Crear notificación para el usuario que está en la lista
-            const user = await User.findById(lista.idUser);
             const notificacion = new Notificacion({
-                idUser: user._id,
+                idUser: lista.idUser,
+                idPublicacion: lista._id,
                 tipo: 'Lista_aceptada',
-                mensaje: `Se ha aceptado tu perfil para la lista ${lista.tipo}.`
+                mensaje: `Se ha aprobado tu perfil para la lista ${lista.tipo}.`
             });
             await notificacion.save();
-
-            res.json({ lista, notificacion });
+            res.json({lista, notificacion});
         } catch (error) {
-            res.status(500).json({ error: helpersGeneral.errores.servidor, error });
+            res.status(500).json({ error: helpersGeneral.errores.servidor });
         }
     },
 
-    //Inactivar lista
+    //Inactivar Publicacion
     putInactivarLista: async (req, res) => {
         try {
             const { id } = req.params;
             const lista = await Lista.findByIdAndUpdate(id, { estado: 'rechazado' }, { new: true });
-
-            // Crear notificación para el usuario que está en la lista
-            const user = await User.findById(lista.idUser);
             const notificacion = new Notificacion({
-                idUser: user._id,
-                tipo: 'Lista_rechazada',
+                idUser: lista.idUser,
+                idPublicacion: lista._id,
+                tipo: 'Publicacion_reject',
                 mensaje: `Se ha rechazado tu perfil para la lista ${lista.tipo}.`
             });
             await notificacion.save();
-
-            res.json({ lista, notificacion });
+            res.json({lista, notificacion});
         } catch (error) {
-            res.status(500).json({ error: helpersGeneral.errores.servidor, error });
+            res.status(500).json({ error: helpersGeneral.errores.servidor });
         }
     },
 
