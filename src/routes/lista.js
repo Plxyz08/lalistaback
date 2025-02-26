@@ -71,10 +71,12 @@ router.put("/editar/:id", [
     validarCampos,
 ], httpLista.putUpdateLista);
 
-router.put("/activar/:id", [
+router.put("/activar/:id/:idCreate", [
     validarJWT,
     check('id', 'Identificador requerido').not().isEmpty(),
     check('id', 'Identificador requerido').isMongoId(),
+    check('idCreate', 'Identificador requerido').not().isEmpty(),
+    check('idCreate', 'Identificador requerido').isMongoId(),
     validarCampos,
 ], httpLista.putActivarLista);
 

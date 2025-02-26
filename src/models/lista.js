@@ -8,7 +8,8 @@ const listaSchema = new mongoose.Schema({
     tipo: { type: String, required: true },
     createAT: { type: Date, default: Date.now },
     estado: { type: String, enum: ['pendiente', 'aceptado', 'rechazado'], default: 'pendiente' },
-    imagen: { type: String }
+    imagen: { type: String },
+    idCreate: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 });
 
 export default mongoose.model('Lista', listaSchema);
