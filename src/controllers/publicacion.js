@@ -205,7 +205,7 @@ const httpPublicacion = {
     putUpdatePublicacion: async (req, res) => {
         try {
             const { id } = req.params;
-            const { titulo, contenido, imagen, idUser } = req.body;
+            const { titulo, contenido, imagen, tipo, ciudad, categoria, idUser } = req.body;
             const user = await User.findById(idUser);
             if (!user) {
                 return res.status(404).json({ error: 'Usuario no encontrado' });
@@ -214,19 +214,19 @@ const httpPublicacion = {
             const userRole = user.rol;
             const publicacion = await Publicacion.findById(id);
             if (!publicacion) {
-                return res.status(404).json({ error: helpersGeneral.errores.noEncontrado });
+                return res.status(404).json({ error: 'Publicación no encontrada' });
             }
             if (publicacion.idUser.toString() !== userId && userRole !== 'admin') {
                 return res.status(403).json({ error: 'No tienes permiso para editar esta publicación' });
             }
             const publicacionActualizada = await Publicacion.findByIdAndUpdate(
                 id,
-                { titulo, contenido, imagen },
+                { titulo, contenido, imagen, tipo, ciudad, categoria },
                 { new: true }
             );
             res.json(publicacionActualizada);
         } catch (error) {
-            res.status(500).json({ error: helpersGeneral.errores.servidor, detalleError: error.message });
+            res.status(500).json({ error: 'Error del servidor', detalleError: error.message });
         }
     },
 
