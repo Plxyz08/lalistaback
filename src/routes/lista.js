@@ -71,10 +71,12 @@ router.put("/editar/:id", [
     validarCampos,
 ], httpLista.putUpdateLista);
 
-router.put("/activar/:id", [
+router.put("/activar/:id/:idCreate", [
     validarJWT,
     check('id', 'Identificador requerido').not().isEmpty(),
     check('id', 'Identificador requerido').isMongoId(),
+    check('idCreate', 'Identificador requerido').not().isEmpty(),
+    check('idCreate', 'Identificador requerido').isMongoId(),
     validarCampos,
 ], httpLista.putActivarLista);
 
@@ -103,22 +105,7 @@ router.post("/perfil", [
     validarCampos,
 ], httpLista.perfilListaPorUsuario);
 
-router.put("/aceptar/:id", [
-    validarJWT,
-    check('id', 'Identificador requerido').not().isEmpty(),
-    check('id', 'Identificador requerido').isMongoId(),
-    validarCampos,
-], httpLista.aceptarPerfilLista);
-
-router.put("/rechazar/:id", [
-    validarJWT,
-    check('id', 'Identificador requerido').not().isEmpty(),
-    check('id', 'Identificador requerido').isMongoId(),
-    validarCampos,
-], httpLista.rechazarPerfilLista);
-
 router.get("/estado/:estado", [
-    validarJWT,
     check('estado', 'Estado requerido').not().isEmpty(),
     validarCampos,
 ], httpLista.getPerfilesByEstado);

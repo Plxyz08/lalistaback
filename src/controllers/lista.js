@@ -4,7 +4,7 @@ import Notificacion from '../models/notificacion.js';
 import helpersGeneral from '../helpers/generales.js';
 
 const httpLista = {
-    //Obtener todas los listas
+    // Obtener todas las listas
     getListas: async (req, res) => {
         try {
             const listas = await Lista.find().populate('idUser', 'nombre correo image');
@@ -17,7 +17,7 @@ const httpLista = {
         }
     },
 
-    //Obtener listas por su id
+    // Obtener listas por su id
     getListaById: async (req, res) => {
         try {
             const { id } = req.params;
@@ -110,7 +110,7 @@ const httpLista = {
         }
     },
 
-    // Agregar un nuevo lista
+    // Agregar una nueva lista
     postAddLista: async (req, res) => {
         try {
             const { idUser, descripcion, razon, categoria, tipo, imagen } = req.body;
@@ -125,7 +125,8 @@ const httpLista = {
                 categoria,
                 tipo,
                 imagen,
-                estado: 'pendiente'
+                estado: 'pendiente',
+                idCreate: req.user._id // Asignar el ID del usuario logueado
             });
             const listaGuardado = await nuevaLista.save();
             res.status(201).json(listaGuardado);
@@ -167,23 +168,43 @@ const httpLista = {
         }
     },
 
-    //Activar lista
+    // Activar lista
     putActivarLista: async (req, res) => {
         try {
             const { id } = req.params;
-            const lista = await Lista.findByIdAndUpdate(id, { estado: 1 }, { new: true });
-            res.json(lista);
+            const lista = await Lista.findByIdAndUpdate(id, { estado: 'aceptado' }, { new: true });
+
+            // Crear notificación para el usuario que creó la lista
+            const userCreador = await User.findById(lista.idCreate);
+            const notificacion = new Notificacion({
+                idUser: userCreador._id,
+                tipo: 'Lista_aceptada',
+                mensaje: `Se ha aceptado tu perfil para la lista ${lista.tipo}.`
+            });
+            await notificacion.save();
+
+            res.json({ lista, notificacion });
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor, error });
         }
     },
 
-    //Inactivar lista
+    // Inactivar lista
     putInactivarLista: async (req, res) => {
         try {
             const { id } = req.params;
-            const lista = await Lista.findByIdAndUpdate(id, { estado: 0 }, { new: true });
-            res.json(lista);
+            const lista = await Lista.findByIdAndUpdate(id, { estado: 'rechazado' }, { new: true });
+
+            // Crear notificación para el usuario que creó la lista
+            const userCreador = await User.findById(lista.idCreate);
+            const notificacion = new Notificacion({
+                idUser: userCreador._id,
+                tipo: 'Lista_rechazada',
+                mensaje: `Se ha rechazado tu perfil para la lista ${lista.tipo}.`
+            });
+            await notificacion.save();
+
+            res.json({ lista, notificacion });
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor, error });
         }
@@ -194,7 +215,7 @@ const httpLista = {
         try {
             const { id } = req.params;
             await Lista.findByIdAndDelete(id);
-            res.json({ message: 'lista eliminado exitosamente' });
+            res.json({ message: 'Lista eliminada exitosamente' });
         } catch (error) {
             res.status(500).json({ error: helpersGeneral.errores.servidor, error });
         }
@@ -203,6 +224,12 @@ const httpLista = {
     perfilListaPorUsuario: async (req, res) => {
         try {
             const { idUser, descripcion, razon, categoria, tipo, imagen } = req.body;
+
+            // Verificar que req.user esté definido
+            if (!req.user) {
+                return res.status(400).json({ error: 'Usuario no autenticado' });
+            }
+
             const nuevaLista = new Lista({
                 idUser,
                 descripcion,
@@ -210,7 +237,8 @@ const httpLista = {
                 categoria,
                 tipo,
                 imagen,
-                estado: 'pendiente'
+                estado: 'pendiente',
+                idCreate: req.user._id // Asignar el ID del usuario logueado
             });
             const listaGuardado = await nuevaLista.save();
 
@@ -222,7 +250,7 @@ const httpLista = {
                 const nuevaNotificacion = new Notificacion({
                     idUser: admin._id,
                     tipo: 'Perfil',
-                    mensaje: `El usuario ${user.nombre} ha creado un nuevo perfil para la lista ${tipo}.`
+                    mensaje: `Se creó el perfil del usuario ${user.nombre} para la lista ${tipo}.`
                 });
                 await nuevaNotificacion.save();
                 notificaciones.push(nuevaNotificacion);
@@ -230,29 +258,8 @@ const httpLista = {
 
             res.status(201).json({ listaGuardado, notificaciones });
         } catch (error) {
-            res.status(500).json({ error: helpersGeneral.errores.servidor, error });
-        }
-    },
-
-    // Aceptar perfil de lista
-    aceptarPerfilLista: async (req, res) => {
-        try {
-            const { id } = req.params;
-            const lista = await Lista.findByIdAndUpdate(id, { estado: 'aceptado' }, { new: true });
-            res.json(lista);
-        } catch (error) {
-            res.status(500).json({ error: helpersGeneral.errores.servidor, error });
-        }
-    },
-
-    // Rechazar perfil de lista
-    rechazarPerfilLista: async (req, res) => {
-        try {
-            const { id } = req.params;
-            const lista = await Lista.findByIdAndUpdate(id, { estado: 'rechazado' }, { new: true });
-            res.json(lista);
-        } catch (error) {
-            res.status(500).json({ error: helpersGeneral.errores.servidor, error });
+            console.error('Error al crear el perfil de la lista:', error);
+            res.status(500).json({ error: 'Error del servidor', error });
         }
     },
 
