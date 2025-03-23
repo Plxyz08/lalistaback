@@ -18,6 +18,11 @@ const helpersUsuario = {
 
     existeNombre: async (nombre, req) => {
         try {
+            if (!nombre) {
+                // Si el nombre no está presente, no realizar validaciones
+                return true;
+            }
+    
             const { method, usuario, body } = req.req;
             const existingUser = await User.findOne({ nombre });
     
@@ -30,7 +35,7 @@ const helpersUsuario = {
                     case "PUT":
                         const existingUserId = existingUser._id.toString();
                         const currentUserId = usuario._id.toString();
-                        
+    
                         if (existingUserId !== currentUserId) {
                             throw new Error('Ya existe un usuario con ese nombre');
                         }
@@ -43,13 +48,13 @@ const helpersUsuario = {
             }
     
             req.req.UserUpdate = existingUser;
-            
+    
             return true;
         } catch (error) {
             throw error;
         }
     },
-
+    
     desactivarAdmin: async (id, req) => {
         const rol = req.req.UserUpdate.rol;
 

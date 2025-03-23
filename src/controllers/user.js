@@ -293,10 +293,24 @@ const hhtpUser = {
         try {
             const { id } = req.params;
             const { nombre, correo, image } = req.body;
-            const user = await User.findByIdAndUpdate(id, { nombre, correo, image }, { new: true });
+    
+            // Construir un objeto con solo los campos enviados
+            const updateData = {};
+            if (nombre) updateData.nombre = nombre;
+            if (correo) updateData.correo = correo;
+            if (image) updateData.image = image;
+    
+            // Actualizar solo los campos enviados
+            const user = await User.findByIdAndUpdate(id, updateData, { new: true });
+    
+            if (!user) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
+            }
+    
             res.json(user);
         } catch (error) {
-            res.status(500).json({ error: helpersGeneral.errores.servidor });
+            console.error('Error al actualizar el usuario:', error);
+            res.status(500).json({ error: 'Error del servidor' });
         }
     },
 
